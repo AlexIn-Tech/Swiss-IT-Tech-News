@@ -1,5 +1,5 @@
-# Swiss-IT-Tech-News
-Bot for telegram channel that 'll publish news based on RSS feed
+# Swiss IT Tech News
+Bot for telegram channel that 'll publish news based on RSS feed : 
 https://t.me/SwissITNews
 
 # How to use this bot :
