@@ -23,7 +23,7 @@ pip3 install python-dateutil
 3) Create your telegram channel , for example here is mine : 
 https://t.me/SwissITNews
 
-4) Create a bot using by sending a message to "@BotFather" on Telegram
+4) Create a bot by sending a message to "@BotFather" on Telegram
 
 5) Add your bot to your channel and setup permissions to send messages
 
