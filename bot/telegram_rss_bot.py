@@ -51,7 +51,7 @@ def load_configuration(configfile: str = "configuration.toml") -> dict:
             config = tomllib.load(f)
             logging.info("Configuration file found and loaded.")
 
-    except tomllib.TOMLDecodeError as e:
+    except Exception as e:
         logging.error(f"Configuration file error:  {str(e)}")
 
         # Look for ENV VARs
