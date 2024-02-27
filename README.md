@@ -9,15 +9,7 @@ https://t.me/SwissITNews
 2) Get a Raspberry Pi and install the needed libraries : 
 
 ```python
-pip3 install requests
-```
-
-```python
-pip3 install feedparser
-```
-
-```
-pip3 install python-dateutil
+pip install -r requirements.txt
 ```
 
 3) Create your telegram channel , for example here is mine : 
@@ -47,4 +39,4 @@ RSS_URLS = [
 feeds = []
 ```
 
-7) Setup a cronjob on your Raspberry Pi to run this script each 20'' minutes 
+7) Setup a cronjob on your Raspberry Pi to run this script each 20'' minutes
