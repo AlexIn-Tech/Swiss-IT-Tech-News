@@ -108,7 +108,7 @@ def parse_rss(rss_feeds: list,
             deltatime = parsecurrenttime - parsepublishedtime
 
             if (deltatime.total_seconds() < entry_max_time_old):
-                logging.debug(f"Entry: {entry.title} @ {entry.link}")
+                logging.info(f"Added new entry: {entry.title} -> {entry.link}")
 
                 # Update telegram bot
                 message = entry.title + "   " + entry.link
