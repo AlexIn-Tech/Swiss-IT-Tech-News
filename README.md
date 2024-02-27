@@ -8,7 +8,9 @@ https://t.me/SwissITNews
 
 2) Get a Raspberry Pi and install the needed libraries : 
 
-```python
+```bash
+virtualenv .venv -p python3
+source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
@@ -36,7 +38,56 @@ RSS_URLS = [
     'https://mspoweruser.com/feed/',
     'https://www.numerama.com/feed/',
     ]
-feeds = []
 ```
 
-7) Setup a cronjob on your Raspberry Pi to run this script each 20'' minutes
+7) The script will continuously run and execute an update at the time interval specified by `TIME_INTERVAL_MIN`.
+
+# Configuration
+This code supports a TOML formatted configuration file:
+```toml
+$ cat configuration.toml
+
+# Configuration file for Telegram Bot
+
+# General settings
+TIME_INTERVAL_MIN = 1  # Run the feedparser every n minutes
+ENTRY_MAX_TIME_OLD = 1200  # 1200 seconds = 20 min
+
+# Bot Configuration
+BOT_TOKEN = "YOUR BOT TOKEN"
+CHANNEL_ID = "@YourChannel"
+
+# News, RSS feeds
+RSS_URLS = [
+    "https://korben.info/feed",
+    "https://www.ictjournal.ch/taxonomy/term/404/feed",
+    "https://www.ictjournal.ch/taxonomy/term/31/feed",
+    "https://www.ictjournal.ch/taxonomy/term/406/feed",
+    "https://www.newsd.admin.ch/newsd/feeds/rss?lang=fr&org-nr=1&offer-nr=308",
+    "https://feeds.feedburner.com/TheHackersNews",
+    "https://mspoweruser.com/feed/",
+    "https://www.numerama.com/feed/",
+    ]
+```
+
+If the configuration file fails (doesn't exist or incorrect synthax), it will default to `ENV VARs`. This last approach is highly recommended, to follow the [Twelve Factor App](https://12factor.net).
+
+To ease the development work, you can rely on a .env file with:
+
+```
+# Development settings
+TIME_INTERVAL_MIN=1
+ENTRY_MAX_TIME_OLD=1200
+BOT_TOKEN="YOUR BOT TOKEN"
+CHANNEL_ID="@YourChannel"
+RSS_URLS="https://korben.info/feed
+https://www.ictjournal.ch/taxonomy/term/404/feed
+https://www.ictjournal.ch/taxonomy/term/31/feed
+https://www.ictjournal.ch/taxonomy/term/406/feed
+https://www.newsd.admin.ch/newsd/feeds/rss?lang=fr&org-nr=1&offer-nr=308
+https://feeds.feedburner.com/TheHackersNews
+https://mspoweruser.com/feed/
+https://www.numerama.com/feed/"
+```
+
+Env Variables can be set/intjected via Dockerfile or a Kubernetes manifest.
