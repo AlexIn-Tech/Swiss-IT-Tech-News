@@ -6,11 +6,12 @@ from time import gmtime, strftime
 from dateutil.parser import parse
 import logging
 import tomllib
-from dotenv import dotenv_values
+from dotenv import load_dotenv
+import os
 
 
 # Basic configuration for logging events
-logging.basicConfig(level=logging.INFO,
+logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 
@@ -44,8 +45,8 @@ def load_configuration(configfile: str = "configuration.toml") -> dict:
         "https://mspoweruser.com/feed/",
         "https://www.numerama.com/feed/",
         ]
-
     """
+    config = {}
     try:
         with open(configfile, "rb") as f:
             config = tomllib.load(f)
@@ -54,16 +55,18 @@ def load_configuration(configfile: str = "configuration.toml") -> dict:
     except Exception as e:
         logging.error(f"Configuration file error:  {str(e)}")
 
-        # Look for ENV VARs
+        # Defaults to ENV VARs
         logging.info("Switching on config from ENV VARS.")
-        env_vars = dotenv_values(".env")
+        load_dotenv()
+
         config = {
-            "TIME_INTERVAL_MIN": int(env_vars['TIME_INTERVAL_MIN']),
-            "ENTRY_MAX_TIME_OLD": int(env_vars['ENTRY_MAX_TIME_OLD']),
-            "BOT_TOKEN": env_vars['BOT_TOKEN'],
-            "CHANNEL_ID": env_vars['CHANNEL_ID'],
-            "RSS_URLS": env_vars['RSS_URLS'].split(),
+            "TIME_INTERVAL_MIN": int(os.getenv("TIME_INTERVAL_MIN")),
+            "ENTRY_MAX_TIME_OLD": int(os.getenv("ENTRY_MAX_TIME_OLD")),
+            "BOT_TOKEN": os.getenv("BOT_TOKEN"),
+            "CHANNEL_ID": os.getenv("CHANNEL_ID"),
+            "RSS_URLS": os.getenv("RSS_URLS").split(),
         }
+    finally:
         logging.debug(config)
     return config
 
