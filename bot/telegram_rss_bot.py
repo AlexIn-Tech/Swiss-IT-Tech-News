@@ -64,6 +64,7 @@ def load_configuration(configfile: str = "configuration.toml") -> dict:
             "CHANNEL_ID": env_vars['CHANNEL_ID'],
             "RSS_URLS": env_vars['RSS_URLS'].split(),
         }
+        logging.debug(config)
     return config
 
 
@@ -113,6 +114,7 @@ def parse_rss(rss_feeds: list,
                 # Update telegram bot
                 message = entry.title + "   " + entry.link
                 send_message(bot_token, channel_id, message)
+    logging.debug("Feeds checked. Sleeping for now.")
     return
 
 # ######################################################################################
