@@ -13,9 +13,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the bot script and configuration file into the container
 COPY bot/telegram_rss_bot.py /app/
-COPY .env /app/
-# Uncomment if you use toml configuration file and comment the .env one. 
-# COPY configuration.toml /app/
 
 # Use dotenv library to load environment variables at runtime
 CMD ["sh", "-c", "python telegram_rss_bot.py"]
