@@ -4,7 +4,7 @@ https://t.me/SwissITNews
 
 # How to use this bot
 
-### Quick Start with Docker
+## Quick Start with Docker
 
 1. Clone or Download the content of this repository.
 
@@ -100,7 +100,7 @@ https://t.me/SwissITNews
 
     Replace `/path/to/your/.env` with the actual path to your `.env` file.
 
-### Traditional Setup
+## Traditional Setup
 
 If you prefer not using Docker, follow these steps:
 
@@ -187,7 +187,7 @@ This chapter guides you through creating your Telegram channel and setting up a 
 3. Follow the instructions from BotFather to set up your bot's name and username. BotFather will then provide you with a token to access the Telegram API, which looks something like this: `123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11`.
 4. Note down your bot's token; you'll need it for the script configuration.
 
-![Bot Father](https://cdn1.telesco.pe/file/NZabVMBzG_0Rntl0ZsfxwQHwpbwdyznyiF-TLzQu7vdYlr8FcuQPbAxuhZRGYjkQUL-WkfdrmqDWiRsVaiM_CVC_Ugb6_2EYdPITtANtCTqXusUUTyXQzzGA9hYaZuahAwYm27-aaBgoh-zs3lXO3UfluRrQNeO0CiijcpNtEJI3ug1aVjyOICWdLsz4awsD92acA8VctWGyF7ZWRgQnpGdbfDkChucbh9BnPfTlxB8LeAVZmAV7YqF6eG910usqlImOPdRZGIJq2Ky42hc55ZbELry3t_bx4Rxbev8DQLM9iQhoKzmAjZ2m02DEgaCPKMIZ4X-hbOj2X87zgyTWmA.jpg)
+![Bot Father](https://cdn1.cdn-telegram.org/file/qVGspOHnp3TahaFa68ddRVkLAiEwzrUODI9QQmfLsw2OpShIsU3wqnFyukr_pBcYdbaqeYAnBsp7iIWAuxs6JfrLBDlx2Pqx4rVjqZ9hOPpsJjSe6sqgiT0_nV2ztGfb8IwWecRsyhUQbbw2PWdd1hO154pdpTI5kNv891YyOYwXQNXDDj7c-cGnyrAil4gWPIX9nmNcnI3c0WugajoD7IZZmfEuMkrA_NwoMD94K4sGWOqeuGAdqI6RED6vx3PfgMyVAhdWcRONdAZuUtx08kxLcKD3Qq0Lp6msay5zhCWNgGLaG5AxiHRU5gTBtC3biMzzzro72or76Cq7nZgQJA.jpg)
 
 ## Adding Your Bot to Your Channel
 
