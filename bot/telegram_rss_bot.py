@@ -68,6 +68,7 @@ def load_configuration(configfile: str = "configuration.toml") -> dict:
         }
     finally:
         logging.debug(config)
+        if not config: logging.error("No configuration found. Set ENV Vars!")
     return config
 
 
