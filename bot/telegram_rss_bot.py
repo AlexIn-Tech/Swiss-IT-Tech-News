@@ -27,7 +27,7 @@ def load_configuration(configfile: str = "configuration.toml") -> dict:
     # Configuration file for Telegram Bot
 
     # General settings
-    TIME_INTERVAL_MIN = 1  # Run the feedparser every n minutes
+    TIME_INTERVAL_MIN = 20  # Run the feedparser every n minutes
     ENTRY_MAX_TIME_OLD = 1200  # 1200 seconds = 20 min
 
     # Bot Configuration

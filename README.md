@@ -20,11 +20,27 @@ https://t.me/SwissITNews
 
      ```
      # .env file
-     TIME_INTERVAL_MIN=1
+     TIME_INTERVAL_MIN=20
      ENTRY_MAX_TIME_OLD=1200
      BOT_TOKEN="YOUR BOT TOKEN"
      CHANNEL_ID="@YourChannel"
-     RSS_URLS='https://korben.info/feed;https://www.ictjournal.ch/taxonomy/term/404/feed;https://www.ictjournal.ch/taxonomy/term/31/feed;https://www.ictjournal.ch/taxonomy/term/406/feed;https://www.newsd.admin.ch/newsd/feeds/rss?lang=fr&org-nr=1&offer-nr=308;https://feeds.feedburner.com/TheHackersNews;https://redmondmag.com/rss-feeds/columns.aspx;https://redmondmag.com/rss-feeds/in-depth.aspx;https://redmondmag.com/rss-feeds/news.aspx;https://redmondmag.com/rss-feeds/tech-library.aspx;https://www.xavierstuder.com/feed;https://www.thelazyadministrator.com/feed;https://4sysops.com/feed;https://www.thomasmaurer.ch/feed;https://www.cyberciti.biz/atom/atom.xml;https://blog.codinghorror.com/rss;https://www.schneier.com/feed/atom'
+     RSS_URLS='https://korben.info/feed
+     https://www.ictjournal.ch/taxonomy/term/404/feed
+     https://www.ictjournal.ch/taxonomy/term/31/feed
+     https://www.ictjournal.ch/taxonomy/term/406/feed
+     https://www.newsd.admin.ch/newsd/feeds/rss?lang=fr&org-nr=1&offer-nr=308
+     https://feeds.feedburner.com/TheHackersNews
+     https://redmondmag.com/rss-feeds/columns.aspx
+     https://redmondmag.com/rss-feeds/in-depth.aspx
+     https://redmondmag.com/rss-feeds/news.aspx
+     https://redmondmag.com/rss-feeds/tech-library.aspx
+     https://www.xavierstuder.com/feed
+     https://www.thelazyadministrator.com/feed
+     https://4sysops.com/feed
+     https://www.thomasmaurer.ch/feed
+     https://www.cyberciti.biz/atom/atom.xml
+     https://blog.codinghorror.com/rss
+     https://www.schneier.com/feed/atom'
      
      # Docker container settings
      TZ=Europe/Zurich
@@ -39,7 +55,7 @@ https://t.me/SwissITNews
      # configuration.toml
 
      # General settings
-     TIME_INTERVAL_MIN = 1  # Run the feedparser every n minutes
+     TIME_INTERVAL_MIN = 20  # Run the feedparser every n minutes
      ENTRY_MAX_TIME_OLD = 1200  # 1200 seconds = 20 minutes
 
      # Bot Configuration
@@ -105,7 +121,7 @@ If you prefer not using Docker, follow these steps:
     # Configuration file for Telegram Bot
 
     # General settings
-    TIME_INTERVAL_MIN = 1  # Run the feedparser every n minutes
+    TIME_INTERVAL_MIN = 20  # Run the feedparser every n minutes
     ENTRY_MAX_TIME_OLD = 1200  # 1200 seconds = 20 min
 
     # Bot Configuration
@@ -128,11 +144,27 @@ If you prefer not using Docker, follow these steps:
     **.env:**
     ```
     # Development settings
-    TIME_INTERVAL_MIN=1
+    TIME_INTERVAL_MIN=20
     ENTRY_MAX_TIME_OLD=1200
     BOT_TOKEN="YOUR BOT TOKEN"
     CHANNEL_ID="@YourChannel"
-    RSS_URLS='https://korben.info/feed;https://www.ictjournal.ch/taxonomy/term/404/feed;https://www.ictjournal.ch/taxonomy/term/31/feed;https://www.ictjournal.ch/taxonomy/term/406/feed;https://www.newsd.admin.ch/newsd/feeds/rss?lang=fr&org-nr=1&offer-nr=308;https://feeds.feedburner.com/TheHackersNews;https://redmondmag.com/rss-feeds/columns.aspx;https://redmondmag.com/rss-feeds/in-depth.aspx;https://redmondmag.com/rss-feeds/news.aspx;https://redmondmag.com/rss-feeds/tech-library.aspx;https://www.xavierstuder.com/feed;https://www.thelazyadministrator.com/feed;https://4sysops.com/feed;https://www.thomasmaurer.ch/feed;https://www.cyberciti.biz/atom/atom.xml;https://blog.codinghorror.com/rss;https://www.schneier.com/feed/atom'
+    RSS_URLS='https://korben.info/feed
+    https://www.ictjournal.ch/taxonomy/term/404/feed
+    https://www.ictjournal.ch/taxonomy/term/31/feed
+    https://www.ictjournal.ch/taxonomy/term/406/feed
+    https://www.newsd.admin.ch/newsd/feeds/rss?lang=fr&org-nr=1&offer-nr=308
+    https://feeds.feedburner.com/TheHackersNews
+    https://redmondmag.com/rss-feeds/columns.aspx
+    https://redmondmag.com/rss-feeds/in-depth.aspx
+    https://redmondmag.com/rss-feeds/news.aspx
+    https://redmondmag.com/rss-feeds/tech-library.aspx
+    https://www.xavierstuder.com/feed
+    https://www.thelazyadministrator.com/feed
+    https://4sysops.com/feed
+    https://www.thomasmaurer.ch/feed
+    https://www.cyberciti.biz/atom/atom.xml
+    https://blog.codinghorror.com/rss
+    https://www.schneier.com/feed/atom'
     ```
 
 4. The script will continuously run and execute an update at the time interval specified in your configuration file.
@@ -197,11 +229,27 @@ To ease the development work, you can rely on a .env file with:
 
 ```
 # Development settings
-TIME_INTERVAL_MIN=1
+TIME_INTERVAL_MIN=20
 ENTRY_MAX_TIME_OLD=1200
 BOT_TOKEN="YOUR BOT TOKEN"
 CHANNEL_ID="@YourChannel"
-RSS_URLS='https://korben.info/feed;https://www.ictjournal.ch/taxonomy/term/404/feed;https://www.numerama.com/feed/'
+RSS_URLS='https://korben.info/feed
+https://www.ictjournal.ch/taxonomy/term/404/feed
+https://www.ictjournal.ch/taxonomy/term/31/feed
+https://www.ictjournal.ch/taxonomy/term/406/feed
+https://www.newsd.admin.ch/newsd/feeds/rss?lang=fr&org-nr=1&offer-nr=308
+https://feeds.feedburner.com/TheHackersNews
+https://redmondmag.com/rss-feeds/columns.aspx
+https://redmondmag.com/rss-feeds/in-depth.aspx
+https://redmondmag.com/rss-feeds/news.aspx
+https://redmondmag.com/rss-feeds/tech-library.aspx
+https://www.xavierstuder.com/feed
+https://www.thelazyadministrator.com/feed
+https://4sysops.com/feed
+https://www.thomasmaurer.ch/feed
+https://www.cyberciti.biz/atom/atom.xml
+https://blog.codinghorror.com/rss
+https://www.schneier.com/feed/atom'
 ```
 
 Env Variables can be set/intjected via Dockerfile or a Kubernetes manifest.
