@@ -19,7 +19,7 @@ https://t.me/SwissITNews
      Create a `.env` file at the root of the project with the following content, replacing the placeholders with your actual data:
 
      ```
-     # .env file
+     # Development settings
      TIME_INTERVAL_MIN=20
      ENTRY_MAX_TIME_OLD=1200
      BOT_TOKEN=yourBotToken
