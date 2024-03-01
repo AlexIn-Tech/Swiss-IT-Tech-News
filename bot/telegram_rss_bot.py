@@ -64,7 +64,7 @@ def load_configuration(configfile: str = "configuration.toml") -> dict:
             "ENTRY_MAX_TIME_OLD": int(os.getenv("ENTRY_MAX_TIME_OLD")),
             "BOT_TOKEN": os.getenv("BOT_TOKEN"),
             "CHANNEL_ID": os.getenv("CHANNEL_ID"),
-            "RSS_URLS": os.getenv("RSS_URLS").split(),
+            "RSS_URLS": os.getenv("RSS_URLS").split(','),
         }
     finally:
         logging.debug(config)
@@ -100,10 +100,15 @@ def parse_rss(rss_feeds: list,
     currenttime = strftime("%Y-%m-%d %H:%M:%S", gmtime())   # get current time and format it with "strftime" method.
                                                             # The strftime() method returns a string representing date and time using date, time or datetime object.
     parsecurrenttime = parse(currenttime)
+    logging.debug(f"Current time parsed: {parsecurrenttime}")
+
 
     for url in rss_feeds:
-        feeds.append(feedparser.parse(url))
-        logging.debug(url)
+        feed = feedparser.parse(url)
+        feeds.append(feed)
+        logging.debug(f"Parsing feed: {url}")
+        if not feed.entries:
+            logging.warning(f"No entries found for feed: {url}")
 
     for feed in feeds:
         for entry in feed.entries:
@@ -111,6 +116,9 @@ def parse_rss(rss_feeds: list,
                                                                                     # The strftime() method returns a string representing date and time using date, time or datetime object.
             parsepublishedtime = parse(publishedtime)
             deltatime = parsecurrenttime - parsepublishedtime
+            
+            # For debugging purposes
+            #logging.debug(f"Processing entry: {entry.title}, Published time: {parsepublishedtime}, Delta time: {deltatime.total_seconds()} seconds")
 
             if (deltatime.total_seconds() < entry_max_time_old):
                 logging.info(f"Added new entry: {entry.title} -> {entry.link}")
@@ -118,6 +126,11 @@ def parse_rss(rss_feeds: list,
                 # Update telegram bot
                 message = entry.title + "   " + entry.link
                 send_message(bot_token, channel_id, message)
+            
+            # For debugging purposes
+            #else:
+                #logging.debug(f"Entry too old: {entry.title}")
+    
     logging.debug("Feeds checked. Sleeping for now.")
     return
 
@@ -134,6 +147,13 @@ rss_urls = config['RSS_URLS']
 entry_max_time_old = config['ENTRY_MAX_TIME_OLD']
 time_interval_min = config['TIME_INTERVAL_MIN']
 
+# TEST
+# Send a test message using the loaded configuration
+# test_message = 'This is a test message to ensure bot connectivity.'
+# send_message(bot_token, channel_id, test_message)
+    
+# Log that a test message has been sent
+# logging.info("Test message sent to ensure bot connectivity.")
 
 def main():
 
