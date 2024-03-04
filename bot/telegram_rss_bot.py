@@ -64,7 +64,7 @@ def load_configuration(configfile: str = "configuration.toml") -> dict:
             "ENTRY_MAX_TIME_OLD": int(os.getenv("ENTRY_MAX_TIME_OLD")),
             "BOT_TOKEN": os.getenv("BOT_TOKEN"),
             "CHANNEL_ID": os.getenv("CHANNEL_ID"),
-            "RSS_URLS": os.getenv("RSS_URLS").split(','),
+            "RSS_URLS": os.getenv("RSS_URLS").split(),
         }
     finally:
         logging.debug(config)
