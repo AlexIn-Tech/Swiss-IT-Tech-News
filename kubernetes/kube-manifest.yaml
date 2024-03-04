@@ -1,0 +1,51 @@
+---
+# Deploy telegram-rss-bot in a namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: telegram-rss-bot
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: telegram-rss-bot
+  namespace: telegram-rss-bot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: telegram-rss-bot
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: telegram-rss-bot
+    spec:
+      containers:
+      - name: telegram-rss-bot
+        image: exo.container-registry.com/pittet-sebastien/telegram-rss-bot:latest
+        env:
+        - name: TIME_INTERVAL_MIN
+          value: "20"
+        - name: ENTRY_MAX_TIME_OLD
+          value: "1200"
+        - name: RSS_URLS
+          value: |
+            "https://www.ictjournal.ch/taxonomy/term/404/feed
+            https://www.ictjournal.ch/taxonomy/term/31/feed"
+        resources:
+          requests:
+            memory: 20M
+            cpu: 0.1
+        livenessProbe:
+          exec:
+            command:
+            - ls
+            - /app
+          initialDelaySeconds: 5
+          periodSeconds: 60
+---
