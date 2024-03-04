@@ -1,7 +1,7 @@
 # This workflow will install Python dependencies, run tests and lint with a single version of Python
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
 
-name: Python application
+name: Python application CI
 
 on:
   push:
@@ -19,9 +19,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Set up Python 3.10
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v4
       with:
         python-version: "3.10"
     - name: Install dependencies
@@ -37,7 +37,7 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
     - name: Set up Docker
-      uses: docker/setup-buildx-action@v1
+      uses: docker/setup-buildx-action@v2
 
     - name: Log into private Docker registry exo.container-registry.com
       uses: docker/login-action@v2
@@ -47,7 +47,7 @@ jobs:
           password: ${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
 
     - name: Build Docker image and push to exo.container-registry.com
-      uses: docker/build-push-action@v2
+      uses: docker/build-push-action@v4
       with:
           context: .
           push: true
