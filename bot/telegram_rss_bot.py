@@ -118,7 +118,7 @@ def parse_rss(rss_feeds: list,
             deltatime = parsecurrenttime - parsepublishedtime
             
             # For debugging purposes
-            #logging.debug(f"Processing entry: {entry.title}, Published time: {parsepublishedtime}, Delta time: {deltatime.total_seconds()} seconds")
+            logging.debug(f"Processing entry: {entry.title}, Published time: {parsepublishedtime}, Delta time: {deltatime.total_seconds()} seconds")
 
             if (deltatime.total_seconds() < entry_max_time_old):
                 logging.info(f"Added new entry: {entry.title} -> {entry.link}")
@@ -128,8 +128,8 @@ def parse_rss(rss_feeds: list,
                 send_message(bot_token, channel_id, message)
             
             # For debugging purposes
-            #else:
-                #logging.debug(f"Entry too old: {entry.title}")
+            else:
+                logging.debug(f"Entry too old: {entry.title}")
     
     logging.debug("Feeds checked. Sleeping for now.")
     return
