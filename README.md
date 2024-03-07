@@ -1,6 +1,5 @@
-# Swiss IT Tech News
-Bot for telegram channel that 'll publish news based on RSS feed : 
-https://t.me/SwissITNews
+# Telegram-RSS-bot
+Bot for telegram channel, example with: [Swiss-IT-News](https://t.me/SwissITNews)
 
 # How to use this bot
 
@@ -8,15 +7,15 @@ https://t.me/SwissITNews
 
 1. Clone or Download the content of this repository.
 
-2. Ensure Docker is installed on your system.
+2. Optional: Ensure Docker is installed on your system.
 
 3. Configuration options:
 
-   You have two options for configuring the bot: using a `.env` file or a TOML file named `configuration.toml`. You can use one of them or both, but remember that environment variables (if set) will take precedence over the settings in the TOML file.
+   You have two options for configuring the bot: using a `.env` file or a TOML file named `configuration.toml`. You can use one of them, but remember that settings in the TOML file will take precedence over the ENV variables.
 
    - **Using a `.env` file:**
 
-     Create a `.env` file at the root of the project with the following content, replacing the placeholders with your actual data:
+     Create a `.env` file in the directory `./bot` with the following content, replacing the placeholders with your actual data:
 
      ```
      # Development settings
@@ -45,7 +44,7 @@ https://t.me/SwissITNews
 
    - **Using a `configuration.toml` file:**
 
-     Alternatively, you can create a `configuration.toml` file in the root of your project with the necessary configuration. Here's a template for the TOML file:
+     Alternatively, you can create a `configuration.toml` file in the directory `./bot` with the necessary configuration. Here's a template for the TOML file:
 
      ```toml
      # configuration.toml
@@ -85,13 +84,13 @@ https://t.me/SwissITNews
 4. Build the Docker image:
 
     ```bash
-    docker build -t swiss-it-tech-news .
+    docker build -t telegram-rss-bot:latest .
     ```
 
 5. Run the Docker container:
 
     ```bash
-    docker run -d --name swiss-it-tech-news-bot --env-file /path/to/your/.env swiss-it-tech-news
+    docker run -d --name telegram-rss-bot:latest --env-file /path/to/your/.env
     ```
 
     Replace `/path/to/your/.env` with the actual path to your `.env` file.
@@ -199,7 +198,7 @@ $ cat configuration.toml
 # Configuration file for Telegram Bot
 
 # General settings
-TIME_INTERVAL_MIN = 1  # Run the feedparser every n minutes
+TIME_INTERVAL_MIN = 20  # Run the feedparser every n minutes
 ENTRY_MAX_TIME_OLD = 1200  # 1200 seconds = 20 min
 
 # Bot Configuration
