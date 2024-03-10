@@ -11,7 +11,7 @@ import os
 
 
 # Basic configuration for logging events
-logging.basicConfig(level=logging.WARNING,
+logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 
@@ -68,7 +68,10 @@ def load_configuration(configfile: str = "configuration.toml") -> dict:
         }
     finally:
         logging.debug(config)
-        if not config: logging.error("No configuration found. Set ENV Vars!")
+        if config:
+            logging.info("Telegram Bot configured.")
+        else:
+            logging.error("No configuration found. Set ENV Vars!")
     return config
 
 
