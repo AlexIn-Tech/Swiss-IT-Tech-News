@@ -11,7 +11,7 @@ import os
 
 
 # Basic configuration for logging events
-logging.basicConfig(level=logging.DEBUG,
+logging.basicConfig(level=logging.WARNING,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 
@@ -97,11 +97,12 @@ def parse_rss(rss_feeds: list,
     Update the telegram bot.
     """
     feeds = []
-    currenttime = strftime("%Y-%m-%d %H:%M:%S", gmtime())   # get current time and format it with "strftime" method.
-                                                            # The strftime() method returns a string representing date and time using date, time or datetime object.
+    # get current time and format it with "strftime" method.
+    # The strftime() method returns a string representing date
+    # and time using date, time or datetime object.
+    currenttime = strftime("%Y-%m-%d %H:%M:%S", gmtime())
     parsecurrenttime = parse(currenttime)
     logging.debug(f"Current time parsed: {parsecurrenttime}")
-
 
     for url in rss_feeds:
         feed = feedparser.parse(url)
@@ -112,11 +113,13 @@ def parse_rss(rss_feeds: list,
 
     for feed in feeds:
         for entry in feed.entries:
-            publishedtime = strftime("%Y-%m-%d %H:%M:%S", entry.published_parsed)   # get published time from feedparser and format it with "strftime" method.
-                                                                                    # The strftime() method returns a string representing date and time using date, time or datetime object.
+            # get published time from feedparser and format it with "strftime" method.
+            # The strftime() method returns a string representing date and time
+            # using date, time or datetime object.
+            publishedtime = strftime("%Y-%m-%d %H:%M:%S", entry.published_parsed)
             parsepublishedtime = parse(publishedtime)
             deltatime = parsecurrenttime - parsepublishedtime
-            
+
             # For debugging purposes
             logging.debug(f"Processing entry: {entry.title}, Published time: {parsepublishedtime}, Delta time: {deltatime.total_seconds()} seconds")
 
@@ -126,11 +129,11 @@ def parse_rss(rss_feeds: list,
                 # Update telegram bot
                 message = entry.title + "   " + entry.link
                 send_message(bot_token, channel_id, message)
-            
+
             # For debugging purposes
             else:
                 logging.debug(f"Entry too old: {entry.title}")
-    
+
     logging.debug("Feeds checked. Sleeping for now.")
     return
 
@@ -151,12 +154,12 @@ time_interval_min = config['TIME_INTERVAL_MIN']
 # Send a test message using the loaded configuration
 # test_message = 'This is a test message to ensure bot connectivity.'
 # send_message(bot_token, channel_id, test_message)
-    
+
 # Log that a test message has been sent
 # logging.info("Test message sent to ensure bot connectivity.")
 
-def main():
 
+def main():
     # Schedule the task to run every n minutes
     schedule.every(time_interval_min).minutes.do(parse_rss,
                                                  rss_feeds=rss_urls,
