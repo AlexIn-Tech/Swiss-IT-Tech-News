@@ -71,6 +71,11 @@ def load_configuration(configfile: str = "configuration.toml") -> dict:
         if not config: logging.error("No configuration found. Set ENV Vars!")
     return config
 
+# Function to clear the cache. The cache is used to avoid duplicate messages.
+def clear_cache():
+    global cache
+    cache = {}
+    logging.info("Cache cleared.")
 
 def send_message(bot_token: str,
                  channel_id: str,
@@ -121,11 +126,15 @@ def parse_rss(rss_feeds: list,
             #logging.debug(f"Processing entry: {entry.title}, Published time: {parsepublishedtime}, Delta time: {deltatime.total_seconds()} seconds")
 
             if (deltatime.total_seconds() < entry_max_time_old):
-                logging.info(f"Added new entry: {entry.title} -> {entry.link}")
+                if entry.link not in cache: #added this line for the cache to avoir duplicate messages
+                    logging.info(f"Added new entry: {entry.title} -> {entry.link}")
 
-                # Update telegram bot
-                message = entry.title + "   " + entry.link
-                send_message(bot_token, channel_id, message)
+                    # Update telegram bot
+                    message = entry.title + "   " + entry.link
+                    send_message(bot_token, channel_id, message)
+                    cache[entry.link] = parsecurrenttime #added this line for the cache to avoir duplicate messages
+                else:
+                    logging.info(f"Duplicate entry skipped: {entry.title} -> {entry.link}")
             
             # For debugging purposes
             #else:
@@ -147,6 +156,10 @@ rss_urls = config['RSS_URLS']
 entry_max_time_old = config['ENTRY_MAX_TIME_OLD']
 time_interval_min = config['TIME_INTERVAL_MIN']
 
+# Basic caching logic to avoid duplicate messages
+cache = {}
+cache_flush_interval_days = 7  # 1 week in days
+
 # TEST
 # Send a test message using the loaded configuration
 # test_message = 'This is a test message to ensure bot connectivity.'
@@ -162,6 +175,10 @@ def main():
                                                  rss_feeds=rss_urls,
                                                  entry_max_time_old=entry_max_time_old)
     logging.info(f"Scheduler set for a run every {time_interval_min} minutes.")
+
+    # Schedule the task to clear the cache every week
+    schedule.every(cache_flush_interval_days).days.do(clear_cache)
+    logging.info("Scheduler set to clear cache every week.")
 
     # Run the scheduled tasks indefinitely
     while True:
