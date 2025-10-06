@@ -1,22 +1,52 @@
-import requests
-import feedparser
-import schedule
+import logging
+import os
 import time
 from time import gmtime, strftime
+from datetime import datetime, timezone
+from calendar import timegm
+
+import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
+import feedparser
+import schedule
 from dateutil.parser import parse
-import logging
-import tomllib
 from dotenv import load_dotenv
-import os
+import tomllib
 
+# ---------------------------------------------------------------------
+# Logging configuration
+# ---------------------------------------------------------------------
+logging.basicConfig(
+    level=logging.INFO,  # set to DEBUG for detailed output
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 
-# Basic configuration for logging events
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+# ---------------------------------------------------------------------
+# HTTP session with retries, timeouts, and user-agent
+# ---------------------------------------------------------------------
+def build_session() -> requests.Session:
+    """Create a requests session with retry and backoff strategy."""
+    s = requests.Session()
+    retries = Retry(
+        total=3,
+        backoff_factor=0.5,
+        status_forcelist=(429, 500, 502, 503, 504),
+        allowed_methods=frozenset(["GET"]),
+        raise_on_status=False,
+    )
+    s.mount("https://", HTTPAdapter(max_retries=retries))
+    s.mount("http://", HTTPAdapter(max_retries=retries))
+    s.headers.update({
+        "User-Agent": "TelegramRSSBot/1.0"
+    })
+    return s
 
+session = build_session()
 
-# Functions
-
+# ---------------------------------------------------------------------
+# Configuration loader (TOML or ENV)
+# ---------------------------------------------------------------------
 def load_configuration(configfile: str = "configuration.toml") -> dict:
     """
     Read a configuration file, TOML formatted.
@@ -46,145 +76,172 @@ def load_configuration(configfile: str = "configuration.toml") -> dict:
         "https://www.numerama.com/feed/",
         ]
     """
+
     config = {}
     try:
         with open(configfile, "rb") as f:
             config = tomllib.load(f)
             logging.info("Configuration file found and loaded.")
-
     except Exception as e:
-        logging.error(f"Configuration file error:  {str(e)}")
-
-        # Defaults to ENV VARs
-        logging.info("Switching on config from ENV VARS.")
+        logging.error(f"Configuration file error: {e}")
+        logging.info("Falling back to environment variables.")
         load_dotenv()
+        try:
+            config = {
+                "TIME_INTERVAL_MIN": int(os.getenv("TIME_INTERVAL_MIN", "20")),
+                "ENTRY_MAX_TIME_OLD": int(os.getenv("ENTRY_MAX_TIME_OLD", "1200")),
+                "BOT_TOKEN": os.getenv("BOT_TOKEN", ""),
+                "CHANNEL_ID": os.getenv("CHANNEL_ID", ""),
+                "RSS_URLS": [u.strip() for u in os.getenv("RSS_URLS", "").split(",") if u.strip()],
+            }
+        except Exception as env_e:
+            logging.exception(f"Environment variable parsing error: {env_e}")
+            config = {}
 
-        config = {
-            "TIME_INTERVAL_MIN": int(os.getenv("TIME_INTERVAL_MIN")),
-            "ENTRY_MAX_TIME_OLD": int(os.getenv("ENTRY_MAX_TIME_OLD")),
-            "BOT_TOKEN": os.getenv("BOT_TOKEN"),
-            "CHANNEL_ID": os.getenv("CHANNEL_ID"),
-            "RSS_URLS": os.getenv("RSS_URLS").split(','),
-        }
-    finally:
-        logging.debug(config)
-        if not config: logging.error("No configuration found. Set ENV Vars!")
+    if not config:
+        logging.error("No configuration found. Provide a TOML file or ENV variables.")
+        raise SystemExit(1)
+
+    # Validate critical fields
+    if not config.get("BOT_TOKEN") or not config.get("CHANNEL_ID"):
+        logging.error("BOT_TOKEN or CHANNEL_ID missing.")
+        raise SystemExit(1)
+    if not config.get("RSS_URLS"):
+        logging.error("RSS_URLS list is empty.")
+        raise SystemExit(1)
+
+    logging.debug(config)
     return config
 
-# Function to clear the cache. The cache is used to avoid duplicate messages.
+# ---------------------------------------------------------------------
+# Cache logic to avoid duplicate messages
+# ---------------------------------------------------------------------
+cache = {}
+cache_flush_interval_days = 7  # reset every 7 days
+
 def clear_cache():
+    """Clear the cache that prevents duplicate posts."""
     global cache
     cache = {}
     logging.info("Cache cleared.")
 
-def send_message(bot_token: str,
-                 channel_id: str,
-                 message: str):
-    """
-    Update the Telegram bot, using a security token,
-    a channel id and a message to post.
-    """
+# ---------------------------------------------------------------------
+# Telegram message sender
+# ---------------------------------------------------------------------
+def send_message(bot_token: str, channel_id: str, message: str):
+    """Send a message to a Telegram channel."""
     try:
-        requests.get(f'https://api.telegram.org/bot{bot_token}/sendMessage?chat_id={channel_id}&text={message}')
-        logging.info(f"Bot content updated with {message}.")
-    except requests.exceptions as e:
-        logging.exception(f"An exception occurred:  {str(e)}")
+        r = session.get(
+            f"https://api.telegram.org/bot{bot_token}/sendMessage",
+            params={"chat_id": channel_id, "text": message},
+            timeout=10,
+        )
+        if r.status_code != 200:
+            logging.warning(f"Telegram returned {r.status_code}: {r.text[:200]}")
+        else:
+            logging.info("Message sent to Telegram successfully.")
+    except requests.RequestException as e:
+        logging.exception(f"Telegram send error: {e}")
 
-    return
+# ---------------------------------------------------------------------
+# Utility to parse RSS entry publish time
+# ---------------------------------------------------------------------
+def entry_datetime_utc(entry) -> datetime | None:
+    """Extract and return the UTC datetime of a feed entry."""
+    st = getattr(entry, "published_parsed", None) or getattr(entry, "updated_parsed", None)
+    if not st:
+        return None
+    return datetime.fromtimestamp(timegm(st), tz=timezone.utc)
 
-
-# Parsing rss
-def parse_rss(rss_feeds: list,
-              entry_max_time_old: int):
-    """
-    Parse a list of RSS feeds, defined in a configuration file.
-    Only keep the latest news (ENTRY_MAX_TIME_OLD).
-    Update the telegram bot.
-    """
-    feeds = []
-    currenttime = strftime("%Y-%m-%d %H:%M:%S", gmtime())   # get current time and format it with "strftime" method.
-                                                            # The strftime() method returns a string representing date and time using date, time or datetime object.
-    parsecurrenttime = parse(currenttime)
-    logging.debug(f"Current time parsed: {parsecurrenttime}")
-
+# ---------------------------------------------------------------------
+# RSS parsing and posting logic
+# ---------------------------------------------------------------------
+def parse_rss(rss_feeds: list, entry_max_time_old: int, bot_token: str, channel_id: str):
+    """Fetch and parse multiple RSS feeds safely, posting only new entries."""
+    current_utc = datetime.now(timezone.utc)
 
     for url in rss_feeds:
-        feed = feedparser.parse(url)
-        feeds.append(feed)
-        logging.debug(f"Parsing feed: {url}")
-        if not feed.entries:
+        try:
+            logging.debug(f"Fetching feed: {url}")
+            resp = session.get(url, timeout=15)
+            resp.raise_for_status()
+            feed = feedparser.parse(resp.content)
+        except requests.RequestException as e:
+            logging.warning(f"Feed fetch failed for {url}: {e}")
+            continue
+        except Exception as e:
+            logging.exception(f"Unexpected error while fetching {url}: {e}")
+            continue
+
+        if not getattr(feed, "entries", []):
             logging.warning(f"No entries found for feed: {url}")
+            continue
 
-    for feed in feeds:
         for entry in feed.entries:
-            publishedtime = strftime("%Y-%m-%d %H:%M:%S", entry.published_parsed)   # get published time from feedparser and format it with "strftime" method.
-                                                                                    # The strftime() method returns a string representing date and time using date, time or datetime object.
-            parsepublishedtime = parse(publishedtime)
-            deltatime = parsecurrenttime - parsepublishedtime
-            
-            # For debugging purposes
-            #logging.debug(f"Processing entry: {entry.title}, Published time: {parsepublishedtime}, Delta time: {deltatime.total_seconds()} seconds")
+            try:
+                published_dt = entry_datetime_utc(entry)
+                if not published_dt:
+                    logging.debug(f"Skipping entry with no publish date: {getattr(entry, 'title', 'no title')}")
+                    continue
 
-            if (deltatime.total_seconds() < entry_max_time_old):
-                if entry.link not in cache: #added this line for the cache to avoir duplicate messages
-                    logging.info(f"Added new entry: {entry.title} -> {entry.link}")
+                delta_sec = (current_utc - published_dt).total_seconds()
+                if delta_sec >= entry_max_time_old:
+                    # Too old, skip
+                    continue
 
-                    # Update telegram bot
-                    message = entry.title + "   " + entry.link
-                    send_message(bot_token, channel_id, message)
-                    cache[entry.link] = parsecurrenttime #added this line for the cache to avoir duplicate messages
-                else:
-                    logging.info(f"Duplicate entry skipped: {entry.title} -> {entry.link}")
-            
-            # For debugging purposes
-            #else:
-                #logging.debug(f"Entry too old: {entry.title}")
-    
-    logging.debug("Feeds checked. Sleeping for now.")
-    return
+                link = getattr(entry, "link", None)
+                title = getattr(entry, "title", "(no title)")
+                if not link:
+                    logging.debug(f"Skipping entry with no link: {title}")
+                    continue
 
-# ######################################################################################
+                if link in cache:
+                    logging.debug(f"Duplicate entry skipped: {title} -> {link}")
+                    continue
 
+                # Send message to Telegram
+                message = f"{title}   {link}"
+                send_message(bot_token, channel_id, message)
+                cache[link] = current_utc
 
-# Load configuration
-config = load_configuration()
+            except Exception as e:
+                logging.exception(f"Error while processing entry from {url}: {e}")
+                continue
 
-# Get values from configuration
-bot_token = config['BOT_TOKEN']
-channel_id = config['CHANNEL_ID']
-rss_urls = config['RSS_URLS']
-entry_max_time_old = config['ENTRY_MAX_TIME_OLD']
-time_interval_min = config['TIME_INTERVAL_MIN']
+    logging.debug("All feeds checked.")
 
-# Basic caching logic to avoid duplicate messages
-cache = {}
-cache_flush_interval_days = 7  # 1 week in days
-
-# TEST
-# Send a test message using the loaded configuration
-# test_message = 'This is a test message to ensure bot connectivity.'
-# send_message(bot_token, channel_id, test_message)
-    
-# Log that a test message has been sent
-# logging.info("Test message sent to ensure bot connectivity.")
-
+# ---------------------------------------------------------------------
+# Main scheduler
+# ---------------------------------------------------------------------
 def main():
+    config = load_configuration()
+    bot_token = config["BOT_TOKEN"]
+    channel_id = config["CHANNEL_ID"]
+    rss_urls = config["RSS_URLS"]
+    entry_max_time_old = config["ENTRY_MAX_TIME_OLD"]
+    time_interval_min = config["TIME_INTERVAL_MIN"]
 
-    # Schedule the task to run every n minutes
-    schedule.every(time_interval_min).minutes.do(parse_rss,
-                                                 rss_feeds=rss_urls,
-                                                 entry_max_time_old=entry_max_time_old)
-    logging.info(f"Scheduler set for a run every {time_interval_min} minutes.")
+    # Schedule main RSS task
+    schedule.every(time_interval_min).minutes.do(
+        parse_rss,
+        rss_feeds=rss_urls,
+        entry_max_time_old=entry_max_time_old,
+        bot_token=bot_token,
+        channel_id=channel_id,
+    )
+    logging.info(f"Scheduler set to run every {time_interval_min} minutes.")
 
-    # Schedule the task to clear the cache every week
+    # Schedule cache cleanup
     schedule.every(cache_flush_interval_days).days.do(clear_cache)
-    logging.info("Scheduler set to clear cache every week.")
+    logging.info("Cache cleanup scheduled once per week.")
 
-    # Run the scheduled tasks indefinitely
+    # Infinite loop that never breaks
     while True:
-        schedule.run_pending()
+        try:
+            schedule.run_pending()
+        except Exception as e:
+            logging.exception(f"Unexpected error in scheduler loop: {e}")
         time.sleep(1)
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
